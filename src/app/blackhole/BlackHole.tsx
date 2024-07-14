@@ -1,10 +1,38 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './blackhole.module.css';
 
 const BlackHole: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const [windowSize, setWindowSize] = useState<{
+    width: number;
+    height: number;
+  }>(() => {
+    if (typeof window !== 'undefined') {
+      return {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
+    }
+    return { width: 0, height: 0 };
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     const bgUrl =
@@ -101,14 +129,8 @@ const BlackHole: React.FC = () => {
         ) as WebGLRenderingContext | null);
       if (!gl) return;
 
-      canvas.width =
-        window.innerWidth >= window.innerHeight
-          ? window.innerWidth
-          : window.innerHeight;
-      canvas.height =
-        window.innerWidth >= window.innerHeight
-          ? window.innerWidth
-          : window.innerHeight;
+      canvas.width = windowSize.width;
+      canvas.height = windowSize.height;
 
       mouse = {
         x: window.innerWidth / 2,
@@ -233,7 +255,7 @@ const BlackHole: React.FC = () => {
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [windowSize.width, windowSize.height]);
 
   return <canvas ref={canvasRef} className={styles.canvas} />;
 };
