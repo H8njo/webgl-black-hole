@@ -75,16 +75,26 @@ const BlackHole: React.FC = () => {
     }
 
     void main() {
-      vec2 st = vec2(gl_FragCoord.x, u_resolution.y - gl_FragCoord.y)/u_resolution;
-      vec2 mt = vec2(u_mouse.x, u_resolution.y - u_mouse.y)/u_resolution;
-      float dx = st.x - mt.x;
-      float dy = st.y - mt.y;
+      vec2 st = gl_FragCoord.xy/u_resolution;
+      vec2 mt = u_mouse/u_resolution;
+      
+      float aspect = u_resolution.x / u_resolution.y;
+      vec2 uv = st;
+      uv.x *= aspect;
+      vec2 mouseUv = mt;
+      mouseUv.x *= aspect;
+
+      float dx = uv.x - mouseUv.x;
+      float dy = uv.y - mouseUv.y;
       float dist = sqrt(dx * dx + dy * dy);
       float pull = u_mass / (dist * dist);
-      vec3 color = vec3(0.0);
-      vec2 r = rotate(mt,st,pull);
+      
+      vec2 r = rotate(mouseUv, uv, pull);
+      
+      r.x /= aspect;
+      
       vec4 imgcolor = texture2D(u_image, r);
-      color = vec3(
+      vec3 color = vec3(
         (imgcolor.x - (pull * 0.25)),
         (imgcolor.y - (pull * 0.25)), 
         (imgcolor.z - (pull * 0.25))
