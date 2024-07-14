@@ -8,7 +8,7 @@ const BlackHole: React.FC = () => {
 
   useEffect(() => {
     const bgUrl =
-      'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1427&q=80';
+      'https://images.unsplash.com/photo-1504333638930-c8787321eee0?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
     let blackholeMass = 1500;
     let curblackholeMass = 0;
     let gl: WebGLRenderingContext | null = null;
@@ -16,8 +16,6 @@ const BlackHole: React.FC = () => {
     let mouse = { x: 0, y: 0, moved: false };
     let startTime = new Date().getTime();
     let currentTime = 0;
-    let clicked = false;
-    let clickedTime = 0;
 
     const vertexShaderSource = `
       attribute vec2 a_position;
@@ -30,41 +28,41 @@ const BlackHole: React.FC = () => {
     `;
 
     const fragmentShaderSource = `
-      precision mediump float;
-      #define PI 3.14159265359
-      uniform sampler2D u_image;
-      varying vec2 v_texCoord;
-      uniform vec2 u_resolution;
-      uniform vec2 u_mouse;
-      uniform float u_mass;
-      uniform float u_time;
-      uniform float u_clickedTime;
+    precision mediump float;
+    #define PI 3.14159265359
+    uniform sampler2D u_image;
+    varying vec2 v_texCoord;
+    uniform vec2 u_resolution;
+    uniform vec2 u_mouse;
+    uniform float u_mass;
+    uniform float u_time;
+    uniform float u_clickedTime;
 
-      vec2 rotate(vec2 mt, vec2 st, float angle){
-        float cos = cos((angle + u_clickedTime) * PI);
-        float sin = sin(angle * 0.0);
-        float nx = (cos * (st.x - mt.x)) + (sin * (st.y - mt.y)) + mt.x;
-        float ny = (cos * (st.y - mt.y)) - (sin * (st.x - mt.x)) + mt.y;
-        return vec2(nx, ny);
-      }
+    vec2 rotate(vec2 mt, vec2 st, float angle){
+      float cos = cos((angle + u_clickedTime) * PI);
+      float sin = sin(angle * 0.0);
+      float nx = (cos * (st.x - mt.x)) + (sin * (st.y - mt.y)) + mt.x;
+      float ny = (cos * (st.y - mt.y)) - (sin * (st.x - mt.x)) + mt.y;
+      return vec2(nx, ny);
+    }
 
-      void main() {
-        vec2 st = vec2(gl_FragCoord.x, u_resolution.y - gl_FragCoord.y)/u_resolution;
-        vec2 mt = vec2(u_mouse.x, u_resolution.y - u_mouse.y)/u_resolution;
-        float dx = st.x - mt.x;
-        float dy = st.y - mt.y;
-        float dist = sqrt(dx * dx + dy * dy);
-        float pull = u_mass / (dist * dist);
-        vec3 color = vec3(0.0);
-        vec2 r = rotate(mt,st,pull);
-        vec4 imgcolor = texture2D(u_image, r);
-        color = vec3(
-          (imgcolor.x - (pull * 0.25)),
-          (imgcolor.y - (pull * 0.25)), 
-          (imgcolor.z - (pull * 0.25))
-        );
-        gl_FragColor = vec4(color,1.);
-      }
+    void main() {
+      vec2 st = vec2(gl_FragCoord.x, u_resolution.y - gl_FragCoord.y)/u_resolution;
+      vec2 mt = vec2(u_mouse.x, u_resolution.y - u_mouse.y)/u_resolution;
+      float dx = st.x - mt.x;
+      float dy = st.y - mt.y;
+      float dist = sqrt(dx * dx + dy * dy);
+      float pull = u_mass / (dist * dist);
+      vec3 color = vec3(0.0);
+      vec2 r = rotate(mt,st,pull);
+      vec4 imgcolor = texture2D(u_image, r);
+      color = vec3(
+        (imgcolor.x - (pull * 0.25)),
+        (imgcolor.y - (pull * 0.25)), 
+        (imgcolor.z - (pull * 0.25))
+      );
+      gl_FragColor = vec4(color,1.);
+    }
     `;
 
     function createShader(
@@ -192,12 +190,6 @@ const BlackHole: React.FC = () => {
         curblackholeMass += (blackholeMass - curblackholeMass) * 0.03;
       }
 
-      if (clicked) {
-        clickedTime += 0.03;
-      } else if (clickedTime > 0 && clicked == false) {
-        clickedTime += -(clickedTime * 0.015);
-      }
-
       if (mouse.moved == false) {
         mouse.y =
           -(window.innerHeight / 2) +
@@ -214,10 +206,6 @@ const BlackHole: React.FC = () => {
       );
       gl.uniform2f(gl.getUniformLocation(program, 'u_mouse'), mouse.x, mouse.y);
       gl.uniform1f(gl.getUniformLocation(program, 'u_time'), currentTime);
-      gl.uniform1f(
-        gl.getUniformLocation(program, 'u_clickedTime'),
-        clickedTime
-      );
       gl.uniform2f(
         gl.getUniformLocation(program, 'u_resolution'),
         canvasRef.current?.width || 0,
@@ -240,22 +228,10 @@ const BlackHole: React.FC = () => {
       mouse.moved = true;
     };
 
-    const handleMouseDown = () => {
-      clicked = true;
-    };
-
-    const handleMouseUp = () => {
-      clicked = false;
-    };
-
     document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
 
