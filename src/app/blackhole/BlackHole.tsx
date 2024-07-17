@@ -249,7 +249,8 @@ void main() {
         curblackholeMass += (blackholeMass - curblackholeMass) * 0.03;
       }
 
-      if (mouse.moved == false) {
+      // 마우스가 움직이지 않은 경우에는 원래의 애니메이션을 유지합니다.
+      if (!mouse.moved) {
         mouse.y =
           -(window.innerHeight / 2) +
           Math.sin(currentTime * 0.7) * (window.innerHeight * 0.25) +
@@ -257,6 +258,10 @@ void main() {
         mouse.x =
           window.innerWidth / 2 +
           Math.sin(currentTime * 0.6) * -(window.innerWidth * 0.35);
+      } else {
+        // 목표 위치로 부드럽게 이동합니다.
+        mouse.x += (targetMouse.x - mouse.x) * 0.1;
+        mouse.y += (targetMouse.y - mouse.y) * 0.1;
       }
 
       gl.uniform1f(
@@ -275,22 +280,23 @@ void main() {
 
       requestAnimationFrame(render);
     }
-
     const image = new Image();
     image.crossOrigin = 'Anonymous';
     image.src = bgUrl;
     image.onload = () => init(image);
 
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.x = e.pageX;
-      mouse.y = -e.pageY + (canvasRef.current?.height || 0);
+    let targetMouse = { x: mouse.x, y: mouse.y };
+
+    const handleMouseClick = (e: MouseEvent) => {
+      targetMouse.x = e.pageX;
+      targetMouse.y = -e.pageY + (canvasRef.current?.height || 0);
       mouse.moved = true;
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('click', handleMouseClick);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('click', handleMouseClick);
     };
   }, [windowSize.width, windowSize.height]);
 
