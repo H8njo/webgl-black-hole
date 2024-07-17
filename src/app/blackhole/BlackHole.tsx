@@ -36,7 +36,7 @@ const BlackHole: React.FC = () => {
 
   useEffect(() => {
     const bgUrl =
-      'https://images.unsplash.com/photo-1504333638930-c8787321eee0?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+      'https://images.unsplash.com/photo-1516331138075-f3adc1e149cd?q=80&w=2708&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
     let blackholeMass = 1500;
     let curblackholeMass = 0;
     let gl: WebGLRenderingContext | null = null;
@@ -57,50 +57,71 @@ const BlackHole: React.FC = () => {
 
     const fragmentShaderSource = `
     precision mediump float;
-    #define PI 3.14159265359
-    uniform sampler2D u_image;
-    varying vec2 v_texCoord;
-    uniform vec2 u_resolution;
-    uniform vec2 u_mouse;
-    uniform float u_mass;
-    uniform float u_time;
-    uniform float u_clickedTime;
+#define PI 3.14159265359
+uniform sampler2D u_image;
+varying vec2 v_texCoord;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+uniform float u_mass;
+uniform float u_time;
+uniform vec2 u_imageResolution;
 
-    vec2 rotate(vec2 mt, vec2 st, float angle){
-      float cos = cos((angle + u_clickedTime) * PI);
-      float sin = sin(angle * 0.0);
-      float nx = (cos * (st.x - mt.x)) + (sin * (st.y - mt.y)) + mt.x;
-      float ny = (cos * (st.y - mt.y)) - (sin * (st.x - mt.x)) + mt.y;
-      return vec2(nx, ny);
-    }
+vec2 rotate(vec2 mt, vec2 st, float angle){
+  float cos = cos(angle * PI);
+  float sin = sin(angle * 0.5);
+  float nx = (cos * (st.x - mt.x)) + (sin * (st.y - mt.y)) + mt.x;
+  float ny = (cos * (st.y - mt.y)) - (sin * (st.x - mt.x)) + mt.y;
+  return vec2(nx, ny);
+}
 
-    void main() {
-      vec2 st = gl_FragCoord.xy/u_resolution;
-      vec2 mt = u_mouse/u_resolution;
-      
-      float aspect = u_resolution.x / u_resolution.y;
-      vec2 uv = st;
-      uv.x *= aspect;
-      vec2 mouseUv = mt;
-      mouseUv.x *= aspect;
+void main() {
+  vec2 st = gl_FragCoord.xy/u_resolution;
+  vec2 mt = u_mouse/u_resolution;
+  
+  float screenAspect = u_resolution.x / u_resolution.y;
+  float imageAspect = u_imageResolution.x / u_imageResolution.y;
+  
+  // 이미지 UV 계산
+  vec2 uv = st;
+  if (screenAspect > imageAspect) {
+    float scale = screenAspect / imageAspect;
+    uv.x = (uv.x - 0.5) * scale + 0.5;
+  } else {
+    float scale = imageAspect / screenAspect;
+    uv.y = (uv.y - 0.5) * scale + 0.5;
+  }
+  
+  // 마우스 UV 계산 (이미지 기준)
+  vec2 mouseUv = mt;
+  if (screenAspect > imageAspect) {
+    float scale = screenAspect / imageAspect;
+    mouseUv.x = (mouseUv.x - 0.5) * scale + 0.5;
+  } else {
+    float scale = imageAspect / screenAspect;
+    mouseUv.y = (mouseUv.y - 0.5) * scale + 0.5;
+  }
 
-      float dx = uv.x - mouseUv.x;
-      float dy = uv.y - mouseUv.y;
-      float dist = sqrt(dx * dx + dy * dy);
-      float pull = u_mass / (dist * dist);
-      
-      vec2 r = rotate(mouseUv, uv, pull);
-      
-      r.x /= aspect;
-      
-      vec4 imgcolor = texture2D(u_image, r);
-      vec3 color = vec3(
-        (imgcolor.x - (pull * 0.25)),
-        (imgcolor.y - (pull * 0.25)), 
-        (imgcolor.z - (pull * 0.25))
-      );
-      gl_FragColor = vec4(color,1.);
-    }
+  // 블랙홀 효과를 위한 거리 계산 (화면 비율 고려)
+  float dx = (uv.x - mouseUv.x) * screenAspect;
+  float dy = uv.y - mouseUv.y;
+  float dist = sqrt(dx * dx + dy * dy);
+  float pull = u_mass / (dist * dist);
+  
+  // 회전 적용 (이미지 UV 기준)
+  vec2 r = rotate(mouseUv, uv, pull);
+  
+  r += vec2(u_time * 0.05);
+  
+  r = fract(r);
+  
+  vec4 imgcolor = texture2D(u_image, r);
+  vec3 color = vec3(
+    (imgcolor.x - (pull * 0.25)),
+    (imgcolor.y - (pull * 0.25)), 
+    (imgcolor.z - (pull * 0.25))
+  );
+  gl_FragColor = vec4(color,1.);
+}
     `;
 
     function createShader(
@@ -166,6 +187,12 @@ const BlackHole: React.FC = () => {
       if (!program) return;
 
       gl.useProgram(program);
+
+      const imageResolutionLocation = gl.getUniformLocation(
+        program,
+        'u_imageResolution'
+      );
+      gl.uniform2f(imageResolutionLocation, image.width, image.height);
 
       const positionBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
