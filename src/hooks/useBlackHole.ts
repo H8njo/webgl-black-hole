@@ -36,13 +36,18 @@ interface BlackHoleConfig {
  * @param {number} windowSize.height - 윈도우 높이
  * @returns {Object} 캔버스 참조 객체
  */
-export const useBlackHole = (windowSize: WindowSize) => {
+export const useBlackHole = (
+  windowSize: WindowSize,
+  backgroundCanvas?: HTMLCanvasElement | null,
+  cameraOffset?: number
+) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isInitializedRef = useRef(false);
 
   // 전역 상태를 위한 ref들
   const glRef = useRef<WebGLRenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
+  const textureRef = useRef<WebGLTexture | null>(null);
   const mouseRef = useRef<MousePosition>({ x: 0, y: 0, moved: false });
   const targetMouseRef = useRef<MousePosition>({ x: 0, y: 0, moved: false });
   const configRef = useRef<BlackHoleConfig>({
@@ -54,14 +59,14 @@ export const useBlackHole = (windowSize: WindowSize) => {
 
   // WebGL 초기화
   useEffect(() => {
-    const bgUrl =
-      'https://images.unsplash.com/photo-1516331138075-f3adc1e149cd?q=80&w=2708&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-
     /**
      * WebGL 컨텍스트와 프로그램 초기화
-     * @param {HTMLImageElement} image - 텍스처로 사용할 이미지
      */
-    const initWebGL = (image: HTMLImageElement) => {
+    const initWebGL = (bgCanvas: HTMLCanvasElement) => {
+      // Galaxy 캔버스가 아직 준비되지 않았으면 대기
+      if (!bgCanvas || bgCanvas.width === 0 || bgCanvas.height === 0) {
+        return;
+      }
       const canvas = canvasRef.current;
       if (!canvas) return;
 
@@ -106,7 +111,14 @@ export const useBlackHole = (windowSize: WindowSize) => {
         program,
         'u_imageResolution'
       );
-      gl.uniform2f(imageResolutionLocation, image.width, image.height);
+      gl.uniform2f(imageResolutionLocation, bgCanvas.width, bgCanvas.height);
+
+      // 카메라 오프셋 유니폼 설정
+      const cameraOffsetLocation = gl.getUniformLocation(
+        program,
+        'u_cameraOffset'
+      );
+      gl.uniform1f(cameraOffsetLocation, cameraOffset || 0);
 
       // 버텍스 버퍼 설정
       const positionBuffer = createQuadBuffer(gl);
@@ -124,9 +136,11 @@ export const useBlackHole = (windowSize: WindowSize) => {
       gl.enableVertexAttribArray(texCoordLocation);
       gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
-      // 텍스처 생성
-      const texture = createTexture(gl, image);
+      // Galaxy 캔버스를 텍스처로 사용
+      const texture = createTexture(gl, bgCanvas);
       if (!texture) return;
+
+      textureRef.current = texture;
 
       isInitializedRef.current = true;
       render();
@@ -191,6 +205,10 @@ export const useBlackHole = (windowSize: WindowSize) => {
         canvasRef.current?.width || 0,
         canvasRef.current?.height || 0
       );
+      glRef.current.uniform1f(
+        glRef.current.getUniformLocation(programRef.current, 'u_cameraOffset'),
+        cameraOffset || 0
+      );
     };
 
     /**
@@ -206,12 +224,50 @@ export const useBlackHole = (windowSize: WindowSize) => {
       requestAnimationFrame(render);
     };
 
-    // 이미지 로드 및 초기화
-    const image = new Image();
-    image.crossOrigin = 'Anonymous';
-    image.src = bgUrl;
-    image.onload = () => initWebGL(image);
+    // WebGL 초기화 (Galaxy 캔버스 사용)
+    if (backgroundCanvas) {
+      initWebGL(backgroundCanvas);
+    }
   }, [windowSize.width, windowSize.height]);
+
+  // backgroundCanvas 변경 시 텍스처 업데이트
+  useEffect(() => {
+    if (
+      !glRef.current ||
+      !programRef.current ||
+      !textureRef.current ||
+      !backgroundCanvas
+    ) {
+      return;
+    }
+
+    const gl = glRef.current;
+    const texture = textureRef.current;
+
+    // 기존 텍스처 업데이트
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      backgroundCanvas
+    );
+
+    // 이미지 해상도 업데이트
+    const imageResolutionLocation = gl.getUniformLocation(
+      programRef.current,
+      'u_imageResolution'
+    );
+    if (imageResolutionLocation) {
+      gl.uniform2f(
+        imageResolutionLocation,
+        backgroundCanvas.width,
+        backgroundCanvas.height
+      );
+    }
+  }, [backgroundCanvas]);
 
   // 클릭 이벤트 처리
   useEffect(() => {

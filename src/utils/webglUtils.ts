@@ -88,14 +88,14 @@ export const createTextureCoordsBuffer = (
 };
 
 /**
- * 이미지로부터 WebGL 텍스처를 생성합니다
+ * 이미지 또는 캔버스로부터 WebGL 텍스처를 생성합니다
  * @param {WebGLRenderingContext} gl - WebGL 컨텍스트
- * @param {HTMLImageElement} image - 텍스처로 사용할 이미지
+ * @param {HTMLImageElement | HTMLCanvasElement} source - 텍스처로 사용할 이미지 또는 캔버스
  * @returns {WebGLTexture | null} 생성된 텍스처 또는 null
  */
 export const createTexture = (
   gl: WebGLRenderingContext,
-  image: HTMLImageElement
+  source: HTMLImageElement | HTMLCanvasElement
 ): WebGLTexture | null => {
   const texture = gl.createTexture();
   if (!texture) return null;
@@ -105,7 +105,7 @@ export const createTexture = (
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
 
   return texture;
 };

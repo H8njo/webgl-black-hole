@@ -29,6 +29,7 @@ export const fragmentShaderSource = `
   uniform float u_mass;
   uniform float u_time;
   uniform vec2 u_imageResolution;
+  uniform float u_cameraOffset;
 
   /**
    * 2D 회전 변환 함수
@@ -78,18 +79,18 @@ export const fragmentShaderSource = `
     float dx = (uv.x - mouseUv.x) * screenAspect;
     float dy = uv.y - mouseUv.y;
     float dist = sqrt(dx * dx + dy * dy);
-    float pull = u_mass / (dist * dist);
+    float pull = u_mass / (dist * dist + 0.001);
     
     // 회전 효과 적용
     vec2 r = rotate(mouseUv, uv, pull);
     
-    // 시간에 따른 애니메이션 효과
-    r += vec2(u_time * 0.05);
+    // 카메라 오프셋과 시간에 따른 애니메이션 효과
+    r += vec2((u_cameraOffset / u_resolution.x) + (u_time * 0.05), 0);
     
     // 텍스처 좌표를 0-1 범위로 제한
     r = fract(r);
     
-    // 이미지에서 색상 샘플링
+    // 텍스처에서 색상 샘플링
     vec4 imgcolor = texture2D(u_image, r);
     
     // 블랙홀 효과에 따른 색상 조정
