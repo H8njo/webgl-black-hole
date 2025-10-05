@@ -13,6 +13,7 @@ A stunning WebGL-powered black hole visualization with interactive starfield bac
 
 ## Demo
 
+![demo](./src/assets/images/demo.png)
 Experience the black hole effect in action - click anywhere to move the black hole and watch the stars bend around it!
 
 ## Technology Stack
