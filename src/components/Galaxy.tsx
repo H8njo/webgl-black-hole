@@ -10,11 +10,33 @@ interface Star {
 
 interface GalaxyProps {
   onCanvasUpdate?: (canvas: HTMLCanvasElement) => void;
-  onCameraUpdate?: (offset: number) => void;
+  backgroundImageUrl?: string;
+  numStars?: number;
+  cameraSpeed?: number;
+  starSizeRange?: {
+    small: { min: number; max: number; ratio: number };
+    medium: { min: number; max: number; ratio: number };
+    large: { min: number; max: number; ratio: number };
+  };
+  brightnessRange?: { min: number; max: number };
 }
 
 const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
-  ({ onCanvasUpdate, onCameraUpdate }, ref) => {
+  (
+    {
+      onCanvasUpdate,
+      backgroundImageUrl,
+      numStars = 10000,
+      cameraSpeed = 0.5,
+      starSizeRange = {
+        small: { min: 0.5, max: 1.2, ratio: 0.7 },
+        medium: { min: 1.0, max: 1.8, ratio: 0.2 },
+        large: { min: 1.5, max: 2.5, ratio: 0.1 },
+      },
+      brightnessRange = { min: 0.8, max: 1.0 },
+    },
+    ref
+  ) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animationRef = useRef<number | null>(null);
     const starsRef = useRef<Star[]>([]);
@@ -33,25 +55,40 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
 
     // 별 생성 함수
     const createStars = (canvas: HTMLCanvasElement): Star[] => {
-      const numStars = 10000; // 별의 개수
-
       for (let i = 0; i < numStars; i++) {
         const x = Math.random() * (canvas.width * 2); // 화면 너비의 2배로 확장
         const y = Math.random() * canvas.height;
-        // 작은 별이 많고 큰 별이 적도록 비율 조정
+        // 별 크기 비율 조정
         const randomValue = Math.random();
         let size;
-        if (randomValue < 0.7) {
-          // 70% - 작은 별 (0.5 ~ 1.0)
-          size = (Math.random() * 0.7 + 0.5) / window.devicePixelRatio;
-        } else if (randomValue < 0.9) {
-          // 20% - 중간 별 (1.0 ~ 1.5)
-          size = (Math.random() * 0.8 + 1.0) / window.devicePixelRatio;
+        if (randomValue < starSizeRange.small.ratio) {
+          // 작은 별
+          size =
+            (Math.random() *
+              (starSizeRange.small.max - starSizeRange.small.min) +
+              starSizeRange.small.min) /
+            window.devicePixelRatio;
+        } else if (
+          randomValue <
+          starSizeRange.small.ratio + starSizeRange.medium.ratio
+        ) {
+          // 중간 별
+          size =
+            (Math.random() *
+              (starSizeRange.medium.max - starSizeRange.medium.min) +
+              starSizeRange.medium.min) /
+            window.devicePixelRatio;
         } else {
-          // 10% - 큰 별 (1.5 ~ 2.5)
-          size = (Math.random() * 1.0 + 1.5) / window.devicePixelRatio;
+          // 큰 별
+          size =
+            (Math.random() *
+              (starSizeRange.large.max - starSizeRange.large.min) +
+              starSizeRange.large.min) /
+            window.devicePixelRatio;
         }
-        const brightness = Math.random() * 0.2 + 0.8; // 0.8 ~ 1 밝기
+        const brightness =
+          Math.random() * (brightnessRange.max - brightnessRange.min) +
+          brightnessRange.min;
 
         // 색상 결정 (흰색, 파란색, 분홍색 계열)
         let color: string;
@@ -90,12 +127,16 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
     // 배경 이미지 로딩
     const loadBackgroundImage = (): Promise<HTMLImageElement> => {
       return new Promise((resolve, reject) => {
+        if (!backgroundImageUrl) {
+          reject(new Error('No background image URL provided'));
+          return;
+        }
+
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => resolve(img);
         img.onerror = reject;
-        img.src =
-          'https://images.unsplash.com/photo-1516331138075-f3adc1e149cd?q=80&w=2708&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+        img.src = backgroundImageUrl;
       });
     };
 
@@ -208,7 +249,7 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
       if (!ctx) return;
 
       // 카메라가 오른쪽으로 이동 (속도 조절 가능)
-      cameraOffsetRef.current += 0.5;
+      cameraOffsetRef.current += cameraSpeed;
 
       // 별들이 화면 너비를 넘어가면 다시 시작 위치로 리셋
       if (cameraOffsetRef.current > canvas.width * 2) {
@@ -220,11 +261,6 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
       // 블랙홀에 캔버스 업데이트 알림
       if (onCanvasUpdate && canvas) {
         onCanvasUpdate(canvas);
-      }
-
-      // 블랙홀에 카메라 오프셋 업데이트 알림
-      if (onCameraUpdate) {
-        onCameraUpdate(cameraOffsetRef.current);
       }
 
       animationRef.current = requestAnimationFrame(animate);

@@ -4,6 +4,7 @@ import { useBlackHole } from '../hooks/useBlackHole';
 interface BlackHoleProps {
   backgroundCanvas?: HTMLCanvasElement | null;
   cameraOffset?: number;
+  cameraSpeed?: number;
 }
 
 /**
@@ -16,6 +17,7 @@ interface BlackHoleProps {
 const BlackHole: React.FC<BlackHoleProps> = ({
   backgroundCanvas,
   cameraOffset = 0,
+  cameraSpeed = 1.0,
 }) => {
   const [windowSize, setWindowSize] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -30,7 +32,8 @@ const BlackHole: React.FC<BlackHoleProps> = ({
   const { canvasRef } = useBlackHole(
     windowSize,
     backgroundCanvas,
-    cameraOffset
+    cameraOffset,
+    cameraSpeed
   );
 
   /**

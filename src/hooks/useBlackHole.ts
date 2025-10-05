@@ -39,7 +39,8 @@ interface BlackHoleConfig {
 export const useBlackHole = (
   windowSize: WindowSize,
   backgroundCanvas?: HTMLCanvasElement | null,
-  cameraOffset?: number
+  cameraOffset?: number,
+  cameraSpeed: number = 0
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isInitializedRef = useRef(false);
@@ -213,6 +214,10 @@ export const useBlackHole = (
       glRef.current.uniform1f(
         glRef.current.getUniformLocation(programRef.current, 'u_cameraOffset'),
         cameraOffset || 0
+      );
+      glRef.current.uniform1f(
+        glRef.current.getUniformLocation(programRef.current, 'u_cameraSpeed'),
+        cameraSpeed
       );
     };
 

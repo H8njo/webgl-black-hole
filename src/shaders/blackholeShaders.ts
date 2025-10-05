@@ -29,7 +29,7 @@ export const fragmentShaderSource = `
   uniform float u_mass;
   uniform float u_time;
   uniform vec2 u_imageResolution;
-  uniform float u_cameraOffset;
+  uniform float u_cameraSpeed;
 
   /**
    * 2D 회전 변환 함수
@@ -84,8 +84,8 @@ export const fragmentShaderSource = `
     // 회전 효과 적용
     vec2 r = rotate(mouseUv, uv, pull);
     
-    // 카메라 오프셋과 시간에 따른 애니메이션 효과
-    r += vec2((u_cameraOffset / u_resolution.x) + (u_time * 0.02), 0);
+    // 카메라 오프셋과 시간에 따른 애니메이션 효과 (카메라 속도 적용)
+    r += vec2((u_time * (u_cameraSpeed * 0.1)* 0.6), 0);
     
     // 텍스처 좌표를 0-1 범위로 제한
     r = fract(r);

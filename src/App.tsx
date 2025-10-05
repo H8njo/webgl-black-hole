@@ -7,14 +7,23 @@ function App() {
   const [galaxyCanvas, setGalaxyCanvas] = useState<HTMLCanvasElement | null>(
     null
   );
-  const [cameraOffset, setCameraOffset] = useState<number>(0);
+
+  // Galaxy 설정
+  const bgUrl =
+    'https://images.unsplash.com/photo-1516331138075-f3adc1e149cd?q=80&w=2708&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+  const galaxyConfig = {
+    numStars: 10000,
+    cameraSpeed: 0,
+    starSizeRange: {
+      small: { min: 0.3, max: 1.0, ratio: 0.8 },
+      medium: { min: 1.0, max: 1.8, ratio: 0.15 },
+      large: { min: 1.8, max: 3.0, ratio: 0.05 },
+    },
+    brightnessRange: { min: 0.7, max: 1.0 },
+  };
 
   const handleGalaxyUpdate = (canvas: HTMLCanvasElement) => {
     setGalaxyCanvas(canvas);
-  };
-
-  const handleCameraUpdate = (offset: number) => {
-    setCameraOffset(offset);
   };
 
   return (
@@ -24,14 +33,15 @@ function App() {
       <Galaxy
         ref={galaxyCanvasRef}
         onCanvasUpdate={handleGalaxyUpdate}
-        onCameraUpdate={handleCameraUpdate}
+        backgroundImageUrl={bgUrl}
+        {...galaxyConfig}
       />
       {/* Blackhole 오버레이 */}
       <div className="absolute inset-0">
         {galaxyCanvas && (
           <BlackHole
             backgroundCanvas={galaxyCanvas}
-            cameraOffset={cameraOffset}
+            cameraSpeed={galaxyConfig.cameraSpeed}
           />
         )}
       </div>
