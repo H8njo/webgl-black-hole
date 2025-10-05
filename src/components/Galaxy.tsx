@@ -87,11 +87,29 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
       return stars;
     };
 
+    // 배경 이미지 로딩
+    const loadBackgroundImage = (): Promise<HTMLImageElement> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src =
+          'https://images.unsplash.com/photo-1516331138075-f3adc1e149cd?q=80&w=2708&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+      });
+    };
+
     // 별 그리기 함수
-    const drawStars = (ctx: CanvasRenderingContext2D, stars: Star[]) => {
-      // 어두운 배경 그리기
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    const drawStars = async (ctx: CanvasRenderingContext2D, stars: Star[]) => {
+      // 배경 이미지 그리기
+      try {
+        const bgImg = await loadBackgroundImage();
+        ctx.drawImage(bgImg, 0, 0, ctx.canvas.width, ctx.canvas.height);
+      } catch (error) {
+        // 이미지 로딩 실패 시 어두운 배경 사용
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      }
 
       // 별들 그리기
       stars.forEach((star) => {
@@ -182,7 +200,7 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
     };
 
     // 애니메이션 루프
-    const animate = () => {
+    const animate = async () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
@@ -197,7 +215,7 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
         cameraOffsetRef.current = 0;
       }
 
-      drawStars(ctx, starsRef.current);
+      await drawStars(ctx, starsRef.current);
 
       // 블랙홀에 캔버스 업데이트 알림
       if (onCanvasUpdate && canvas) {
