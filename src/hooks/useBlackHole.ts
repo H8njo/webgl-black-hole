@@ -178,9 +178,9 @@ export const useBlackHole = (
       } else {
         // 사용자 클릭 모드 - 부드러운 이동
         mouseRef.current.x +=
-          (targetMouseRef.current.x - mouseRef.current.x) * 0.1;
+          (targetMouseRef.current.x - mouseRef.current.x) * 0.02;
         mouseRef.current.y +=
-          (targetMouseRef.current.y - mouseRef.current.y) * 0.1;
+          (targetMouseRef.current.y - mouseRef.current.y) * 0.02;
       }
     };
 

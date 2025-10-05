@@ -85,7 +85,7 @@ export const fragmentShaderSource = `
     vec2 r = rotate(mouseUv, uv, pull);
     
     // 카메라 오프셋과 시간에 따른 애니메이션 효과
-    r += vec2((u_cameraOffset / u_resolution.x) + (u_time * 0.05), 0);
+    r += vec2((u_cameraOffset / u_resolution.x) + (u_time * 0.02), 0);
     
     // 텍스처 좌표를 0-1 범위로 제한
     r = fract(r);
