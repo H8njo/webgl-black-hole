@@ -1,73 +1,178 @@
-# React + TypeScript + Vite
+# WebGL Black Hole Effect
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A stunning WebGL-powered black hole visualization with interactive starfield background and gravitational distortion effects.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🌌 **Dynamic Starfield**: Procedurally generated stars with realistic size distribution and brightness
+- 🕳️ **Black Hole Physics**: Realistic gravitational lensing and distortion effects
+- 🎨 **Interactive Background**: Click to move the black hole to any position
+- ⚡ **WebGL Performance**: Hardware-accelerated rendering for smooth 60fps animation
+- 🎛️ **Configurable Settings**: Customizable star count, camera speed, and visual parameters
+- 🖼️ **Background Images**: Support for custom background images with Unsplash integration
 
-## React Compiler
+## Demo
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+Experience the black hole effect in action - click anywhere to move the black hole and watch the stars bend around it!
 
-## Expanding the ESLint configuration
+## Technology Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **React 18** - Component-based UI
+- **TypeScript** - Type-safe development
+- **WebGL** - Hardware-accelerated graphics
+- **GLSL Shaders** - Custom fragment shaders for black hole effects
+- **Canvas 2D** - Starfield rendering
+- **Vite** - Fast development and building
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Project Structure
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── components/
+│   └── Blackhole/
+│       ├── index.tsx          # Main component
+│       ├── Blackhole.tsx      # WebGL black hole component
+│       └── Galaxy.tsx         # Starfield background component
+├── hooks/
+│   └── useBlackHole.ts        # WebGL logic and black hole physics
+├── shaders/
+│   └── blackholeShaders.ts    # GLSL vertex and fragment shaders
+├── utils/
+│   └── webglUtils.ts          # WebGL utility functions
+└── App.tsx                    # Main application component
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Installation
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Clone the repository:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/your-username/webgl-black-hole.git
+cd webgl-black-hole
 ```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Start the development server:
+
+```bash
+npm run dev
+```
+
+4. Open your browser and navigate to `http://localhost:5173`
+
+## Configuration
+
+The black hole effect can be customized through the `galaxyConfig` object in `App.tsx`:
+
+```typescript
+const galaxyConfig = {
+  numStars: 10000, // Number of stars to render
+  cameraSpeed: 0.3, // Speed of camera movement
+  starSizeRange: {
+    small: { min: 0.3, max: 1.0, ratio: 0.8 }, // 80% small stars
+    medium: { min: 1.0, max: 1.8, ratio: 0.15 }, // 15% medium stars
+    large: { min: 1.8, max: 3.0, ratio: 0.05 }, // 5% large stars
+  },
+  brightnessRange: { min: 0.7, max: 1.0 }, // Star brightness range
+};
+```
+
+## Key Components
+
+### Galaxy Component
+
+- Renders the starfield background using Canvas 2D
+- Supports custom background images
+- Configurable star distribution and properties
+- Smooth camera movement animation
+
+### BlackHole Component
+
+- WebGL-powered gravitational distortion effects
+- Interactive positioning (click to move)
+- Real-time shader-based rendering
+- Synchronized with background camera movement
+
+### WebGL Shaders
+
+- **Vertex Shader**: Renders a full-screen quad
+- **Fragment Shader**: Implements gravitational lensing physics
+- Real-time distortion calculations
+- Smooth interpolation and anti-aliasing
+
+## Physics Implementation
+
+The black hole effect uses realistic gravitational physics:
+
+- **Gravitational Pull**: `pull = mass / (distance² + epsilon)`
+- **Lensing Effect**: UV coordinates are rotated around the black hole center
+- **Time Dilation**: Background movement synchronized with camera speed
+- **Event Horizon**: Central region with maximum distortion
+
+## Performance Optimization
+
+- **Efficient Rendering**: Single draw call per frame
+- **GPU Acceleration**: All calculations performed in shaders
+- **Memory Management**: Proper WebGL resource cleanup
+- **Responsive Design**: Automatic canvas resizing
+
+## Browser Support
+
+- Chrome 60+
+- Firefox 55+
+- Safari 12+
+- Edge 79+
+
+Requires WebGL 1.0 support.
+
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+### Adding New Features
+
+1. **Custom Shaders**: Modify `blackholeShaders.ts` for new visual effects
+2. **Star Properties**: Extend the `Star` interface in `Galaxy.tsx`
+3. **Physics Parameters**: Adjust gravitational constants in the fragment shader
+4. **UI Controls**: Add interactive controls in `App.tsx`
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Inspired by real gravitational lensing effects observed in space
+- WebGL shader techniques based on astrophysical simulations
+- Background images provided by Unsplash
+
+## Future Enhancements
+
+- [ ] Multiple black holes support
+- [ ] Particle system for accretion disk
+- [ ] VR/AR compatibility
+- [ ] Real-time physics simulation
+- [ ] Custom shader editor
+- [ ] Export to video functionality
+
+---
+
+Made with ❤️ and WebGL
