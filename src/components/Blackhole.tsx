@@ -62,7 +62,6 @@ const BlackHole: React.FC<BlackHoleProps> = ({
         width: '100%',
         height: '100%',
         backgroundColor: 'transparent',
-        pointerEvents: 'none',
       }}
     />
   );

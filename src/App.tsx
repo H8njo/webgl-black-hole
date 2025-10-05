@@ -27,7 +27,7 @@ function App() {
         onCameraUpdate={handleCameraUpdate}
       />
       {/* Blackhole 오버레이 */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0">
         {galaxyCanvas && (
           <BlackHole
             backgroundCanvas={galaxyCanvas}

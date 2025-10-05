@@ -97,7 +97,7 @@ export const fragmentShaderSource = `
     vec3 color = vec3(
       (imgcolor.x - (pull * 0.25)),
       (imgcolor.y - (pull * 0.25)), 
-      (imgcolor.z - (pull * 0.2))
+      (imgcolor.z - (pull * 0.25))
     );
     
     gl_FragColor = vec4(color, 1.0);
