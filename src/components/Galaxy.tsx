@@ -33,13 +33,25 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
 
     // 별 생성 함수
     const createStars = (canvas: HTMLCanvasElement): Star[] => {
-      const numStars = 13000; // 별의 개수
+      const numStars = 10000; // 별의 개수
 
       for (let i = 0; i < numStars; i++) {
         const x = Math.random() * (canvas.width * 2); // 화면 너비의 2배로 확장
         const y = Math.random() * canvas.height;
-        const size = (Math.random() * 1 + 0.5) / window.devicePixelRatio; // devicePixelRatio 고려한 크기
-        const brightness = Math.random(); // 0 ~ 1 밝기
+        // 작은 별이 많고 큰 별이 적도록 비율 조정
+        const randomValue = Math.random();
+        let size;
+        if (randomValue < 0.7) {
+          // 70% - 작은 별 (0.5 ~ 1.0)
+          size = (Math.random() * 0.7 + 0.5) / window.devicePixelRatio;
+        } else if (randomValue < 0.9) {
+          // 20% - 중간 별 (1.0 ~ 1.5)
+          size = (Math.random() * 0.8 + 1.0) / window.devicePixelRatio;
+        } else {
+          // 10% - 큰 별 (1.5 ~ 2.5)
+          size = (Math.random() * 1.0 + 1.5) / window.devicePixelRatio;
+        }
+        const brightness = Math.random() * 0.2 + 0.8; // 0.8 ~ 1 밝기
 
         // 색상 결정 (흰색, 파란색, 분홍색 계열)
         let color: string;
