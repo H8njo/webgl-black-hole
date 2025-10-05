@@ -77,8 +77,11 @@ export const useBlackHole = (
       if (!gl) return;
 
       glRef.current = gl;
-      canvas.width = windowSize.width;
-      canvas.height = windowSize.height;
+
+      // Galaxy와 동일한 해상도로 설정 (devicePixelRatio 제거)
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
 
       mouseRef.current = {
         x: window.innerWidth / 2,
@@ -86,7 +89,7 @@ export const useBlackHole = (
         moved: false,
       };
 
-      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      gl.viewport(0, 0, canvas.width, canvas.height);
 
       const vertexShader = createShader(
         gl,
@@ -200,10 +203,12 @@ export const useBlackHole = (
         glRef.current.getUniformLocation(programRef.current, 'u_time'),
         configRef.current.currentTime
       );
+      // 논리적 해상도 전달 (Galaxy와 동일)
+      const rect = canvasRef.current?.getBoundingClientRect();
       glRef.current.uniform2f(
         glRef.current.getUniformLocation(programRef.current, 'u_resolution'),
-        canvasRef.current?.width || 0,
-        canvasRef.current?.height || 0
+        rect?.width || 0,
+        rect?.height || 0
       );
       glRef.current.uniform1f(
         glRef.current.getUniformLocation(programRef.current, 'u_cameraOffset'),

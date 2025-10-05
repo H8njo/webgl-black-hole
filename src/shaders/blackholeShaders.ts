@@ -93,11 +93,11 @@ export const fragmentShaderSource = `
     // 텍스처에서 색상 샘플링
     vec4 imgcolor = texture2D(u_image, r);
     
-    // 블랙홀 효과에 따른 색상 조정
+      // 블랙홀 효과에 따른 색상 조정
     vec3 color = vec3(
       (imgcolor.x - (pull * 0.25)),
       (imgcolor.y - (pull * 0.25)), 
-      (imgcolor.z - (pull * 0.25))
+      (imgcolor.z - (pull * 0.2))
     );
     
     gl_FragColor = vec4(color, 1.0);

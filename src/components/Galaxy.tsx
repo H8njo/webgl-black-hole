@@ -77,8 +77,9 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
 
     // 별 그리기 함수
     const drawStars = (ctx: CanvasRenderingContext2D, stars: Star[]) => {
-      // 배경을 투명하게 유지 (블랙홀 효과를 위해)
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      // 어두운 배경 그리기
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       // 별들 그리기
       stars.forEach((star) => {
@@ -93,9 +94,9 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
         }
 
         // 별의 크기에 따라 그리기 방식 결정
-        if (star.size > 0.7) {
+        if (star.size > 1.0) {
           // 큰 별들은 후광 효과 추가
-          const glowSize = star.size * 3;
+          const glowSize = star.size * 4;
           const glowGradient = ctx.createRadialGradient(
             screenX,
             star.y,
@@ -205,12 +206,13 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
       if (!canvas) return;
 
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
+      canvas.width = rect.width;
+      canvas.height = rect.height;
 
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        // 스케일링 제거 - 선명한 렌더링을 위해
+        ctx.imageSmoothingEnabled = false;
       }
 
       // 별들 재생성
