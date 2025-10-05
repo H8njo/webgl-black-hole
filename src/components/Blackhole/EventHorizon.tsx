@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useBlackHole } from '../hooks/useBlackHole';
+import { useBlackHole } from '../../hooks/useBlackHole';
 
-interface BlackHoleProps {
+interface EventHorizonProps {
   backgroundCanvas?: HTMLCanvasElement | null;
   cameraOffset?: number;
   cameraSpeed?: number;
@@ -12,12 +12,14 @@ interface BlackHoleProps {
  * WebGL을 사용하여 실시간 블랙홀 중력 효과를 렌더링합니다
  * @param {BlackHoleProps} props - 컴포넌트 props
  * @param {HTMLCanvasElement} props.backgroundCanvas - 배경으로 사용할 캔버스
+ * @param {number} props.cameraOffset - 카메라 오프셋
+ * @param {number} props.cameraSpeed - 카메라 속도
  * @returns {JSX.Element} 블랙홀 캔버스 요소
  */
-const BlackHole: React.FC<BlackHoleProps> = ({
+const EventHorizon: React.FC<EventHorizonProps> = ({
   backgroundCanvas,
   cameraOffset = 0,
-  cameraSpeed = 1.0,
+  cameraSpeed,
 }) => {
   const [windowSize, setWindowSize] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -58,16 +60,9 @@ const BlackHole: React.FC<BlackHoleProps> = ({
   return (
     <canvas
       ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'transparent',
-      }}
+      className="absolute top-0 left-0 w-full h-full bg-transparent cursor-pointer"
     />
   );
 };
 
-export default BlackHole;
+export default EventHorizon;
