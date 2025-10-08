@@ -30,6 +30,7 @@ export const fragmentShaderSource = `
   uniform float u_time;
   uniform vec2 u_imageResolution;
   uniform float u_cameraSpeed;
+  uniform float u_radius;
 
   /**
    * 2D 회전 변환 함수
@@ -79,7 +80,20 @@ export const fragmentShaderSource = `
     float dx = (uv.x - mouseUv.x) * screenAspect;
     float dy = uv.y - mouseUv.y;
     float dist = sqrt(dx * dx + dy * dy);
-    float pull = u_mass / (dist * dist + 0.001);
+    
+    // 왜곡 범위 제한 - radius를 넘으면 왜곡 효과 없음
+    float normalizedRadius = u_radius / u_resolution.x; // 화면 크기에 비례한 정규화된 반지름
+    float falloffFactor = 1.0;
+    
+    if (dist > normalizedRadius) {
+      // 범위 밖에서는 왜곡 효과 없음
+      falloffFactor = 0.0;
+    } else {
+      // 범위 내에서는 거리에 따라 부드럽게 감소
+      falloffFactor = 1.0 - smoothstep(0.0, normalizedRadius, dist);
+    }
+    
+    float pull = (u_mass / (dist * dist + 0.001)) * falloffFactor;
     
     // 회전 효과 적용
     vec2 r = rotate(mouseUv, uv, pull);

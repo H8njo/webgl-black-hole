@@ -40,7 +40,9 @@ export const useBlackHole = (
   windowSize: WindowSize,
   backgroundCanvas?: HTMLCanvasElement | null,
   cameraOffset?: number,
-  cameraSpeed: number = 0
+  cameraSpeed: number = 0,
+  radius: number = 200,
+  animation?: boolean
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isInitializedRef = useRef(false);
@@ -165,6 +167,7 @@ export const useBlackHole = (
           (configRef.current.mass - configRef.current.currentMass) * 0.03;
       }
 
+      if (!animation) return;
       if (!mouseRef.current.moved) {
         // 자동 애니메이션 모드
         mouseRef.current.y =
@@ -218,6 +221,10 @@ export const useBlackHole = (
       glRef.current.uniform1f(
         glRef.current.getUniformLocation(programRef.current, 'u_cameraSpeed'),
         cameraSpeed
+      );
+      glRef.current.uniform1f(
+        glRef.current.getUniformLocation(programRef.current, 'u_radius'),
+        radius
       );
     };
 

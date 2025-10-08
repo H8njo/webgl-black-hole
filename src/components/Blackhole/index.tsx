@@ -2,16 +2,18 @@ import { useRef, useState } from 'react';
 import EventHorizon from './EventHorizon';
 import Galaxy from './Galaxy';
 
-interface BlackholeProps {
+export interface BlackholeProps {
   backgroundImageUrl?: string;
   numStars?: number;
   cameraSpeed?: number;
+  radius?: number;
   starSizeRange?: {
     small: { min: number; max: number; ratio: number };
     medium: { min: number; max: number; ratio: number };
     large: { min: number; max: number; ratio: number };
   };
   brightnessRange?: { min: number; max: number };
+  animation?: boolean;
 }
 
 const Blackhole = (props: BlackholeProps) => {
@@ -34,7 +36,9 @@ const Blackhole = (props: BlackholeProps) => {
         {galaxyCanvas && (
           <EventHorizon
             backgroundCanvas={galaxyCanvas}
-            cameraSpeed={props.cameraSpeed || 0}
+            cameraSpeed={props.cameraSpeed}
+            radius={props.radius || 200}
+            animation={!!props.animation}
           />
         )}
       </div>
