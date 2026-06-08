@@ -238,6 +238,20 @@ export const useBlackHole = (
     const render = () => {
       if (!glRef.current || !programRef.current) return;
 
+      // 드로잉 버퍼를 표시 크기에 매 프레임 동기화 — init 타이밍/풀스크린에서
+      // 버퍼가 기본 300x150에 갇혀 저해상도로 늘어나는 문제 방지.
+      const c = canvasRef.current;
+      if (c) {
+        const r = c.getBoundingClientRect();
+        const w = Math.round(r.width);
+        const h = Math.round(r.height);
+        if (w > 0 && h > 0 && (c.width !== w || c.height !== h)) {
+          c.width = w;
+          c.height = h;
+          glRef.current.viewport(0, 0, w, h);
+        }
+      }
+
       updateMousePosition();
       updateUniforms();
       glRef.current.drawArrays(glRef.current.TRIANGLES, 0, 6);
