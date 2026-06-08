@@ -86,9 +86,10 @@ export const useBlackHole = (
       canvas.width = rect.width;
       canvas.height = rect.height;
 
+      // 컨테이너(캔버스) 기준 좌표 — 풀스크린(window) 대신 부모 컨테이너에 맞춤
       mouseRef.current = {
-        x: window.innerWidth / 2,
-        y: -(window.innerHeight / 2) + canvas.height,
+        x: canvas.width / 2,
+        y: -(canvas.height / 2) + canvas.height,
         moved: false,
       };
 
@@ -169,16 +170,16 @@ export const useBlackHole = (
 
       if (!animation) return;
       if (!mouseRef.current.moved) {
-        // 자동 애니메이션 모드
+        // 자동 애니메이션 모드 — 컨테이너(캔버스) 크기 기준으로 궤도 계산
+        const cw = canvasRef.current?.width || 0;
+        const ch = canvasRef.current?.height || 0;
         mouseRef.current.y =
-          -(window.innerHeight / 2) +
-          Math.sin(configRef.current.currentTime * 0.7) *
-            (window.innerHeight * 0.25) +
-          (canvasRef.current?.height || 0);
+          -(ch / 2) +
+          Math.sin(configRef.current.currentTime * 0.7) * (ch * 0.25) +
+          ch;
         mouseRef.current.x =
-          window.innerWidth / 2 +
-          Math.sin(configRef.current.currentTime * 0.6) *
-            -(window.innerWidth * 0.35);
+          cw / 2 +
+          Math.sin(configRef.current.currentTime * 0.6) * -(cw * 0.35);
       } else {
         // 사용자 클릭 모드 - 부드러운 이동
         mouseRef.current.x +=
@@ -305,9 +306,9 @@ export const useBlackHole = (
       // 캔버스 영역을 벗어나면 무시
       if (x < 0 || x > rect.width || y < 0 || y > rect.height) return;
 
-      // 목표 마우스 위치 설정
-      targetMouseRef.current.x = e.pageX;
-      targetMouseRef.current.y = -e.pageY + canvas.height;
+      // 목표 마우스 위치 설정 — 컨테이너(캔버스) 로컬 좌표 기준
+      targetMouseRef.current.x = x;
+      targetMouseRef.current.y = -y + canvas.height;
       mouseRef.current.moved = true;
     };
 

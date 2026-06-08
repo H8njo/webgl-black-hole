@@ -24,7 +24,8 @@ const Blackhole = (props: BlackholeProps) => {
     setGalaxyCanvas(canvas);
   };
   return (
-    <div className="relative w-full h-screen bg-black">
+    // 풀스크린(h-screen) 대신 부모 컨테이너를 가득 채움(h-full).
+    <div className="relative w-full h-full bg-black">
       {/* Galaxy 배경 */}
       <Galaxy
         ref={galaxyCanvasRef}

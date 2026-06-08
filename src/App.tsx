@@ -15,7 +15,12 @@ function App() {
     backgroundImageUrl:
       'https://images.unsplash.com/photo-1516331138075-f3adc1e149cd?q=80&w=2708&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   };
-  return <Blackhole {...galaxyConfig} />;
+  // 컴포넌트가 h-full이므로 standalone 데브 앱에서는 풀스크린 컨테이너로 감싼다.
+  return (
+    <div className="h-screen w-screen">
+      <Blackhole {...galaxyConfig} />
+    </div>
+  );
 }
 
 export default App;

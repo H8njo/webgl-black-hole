@@ -266,7 +266,7 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    // 캔버스 크기 조정
+    // 캔버스 크기 조정 (컨테이너 기준 — getBoundingClientRect)
     const resizeCanvas = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -293,19 +293,21 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
       resizeCanvas();
       animationRef.current = requestAnimationFrame(animate);
 
-      // 리사이즈 이벤트 리스너
-      window.addEventListener('resize', resizeCanvas);
+      // 부모 컨테이너 크기 변화에 반응 (풀스크린 window.resize 대신 ResizeObserver)
+      const ro = new ResizeObserver(() => resizeCanvas());
+      if (canvas.parentElement) ro.observe(canvas.parentElement);
 
       return () => {
         if (animationRef.current) {
           cancelAnimationFrame(animationRef.current);
         }
-        window.removeEventListener('resize', resizeCanvas);
+        ro.disconnect();
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
-      <div className="w-full h-screen overflow-hidden">
+      <div className="w-full h-full overflow-hidden">
         <canvas
           ref={(node) => {
             canvasRef.current = node;
@@ -321,5 +323,7 @@ const Galaxy = forwardRef<HTMLCanvasElement, GalaxyProps>(
     );
   }
 );
+
+Galaxy.displayName = 'Galaxy';
 
 export default Galaxy;
