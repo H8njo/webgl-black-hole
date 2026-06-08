@@ -82,9 +82,11 @@ export const useBlackHole = (
       glRef.current = gl;
 
       // Galaxy와 동일한 해상도로 설정 (devicePixelRatio 제거)
+      // 측정값(windowSize=컨테이너 크기) 우선 — init 시점 getBoundingClientRect가
+      // 0/미정이면 드로잉 버퍼가 기본 300x150에 갇혀 왜곡이 저해상도로 늘어남.
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+      canvas.width = windowSize.width || rect.width;
+      canvas.height = windowSize.height || rect.height;
 
       // 컨테이너(캔버스) 기준 좌표 — 풀스크린(window) 대신 부모 컨테이너에 맞춤
       mouseRef.current = {
