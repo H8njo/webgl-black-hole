@@ -170,25 +170,28 @@ export const useBlackHole = (
           (configRef.current.mass - configRef.current.currentMass) * 0.03;
       }
 
-      if (!animation) return;
-      if (!mouseRef.current.moved) {
-        // 자동 애니메이션 모드 — 컨테이너(캔버스) 크기 기준으로 궤도 계산
-        const cw = canvasRef.current?.width || 0;
-        const ch = canvasRef.current?.height || 0;
-        mouseRef.current.y =
-          -(ch / 2) +
-          Math.sin(configRef.current.currentTime * 0.7) * (ch * 0.25) +
-          ch;
-        mouseRef.current.x =
-          cw / 2 +
-          Math.sin(configRef.current.currentTime * 0.6) * -(cw * 0.35);
-      } else {
-        // 사용자 클릭 모드 - 부드러운 이동
+      // 클릭으로 목표가 잡혔으면 animation 플래그와 무관하게 그쪽으로 부드럽게 이동.
+      // (animation은 '클릭 전 idle 자동궤도'만 켜고 끈다. 클릭 반응까지 막으면 안 됨.)
+      if (mouseRef.current.moved) {
         mouseRef.current.x +=
           (targetMouseRef.current.x - mouseRef.current.x) * 0.02;
         mouseRef.current.y +=
           (targetMouseRef.current.y - mouseRef.current.y) * 0.02;
+        return;
       }
+
+      // 아직 클릭 전 — animation 모드일 때만 자동 궤도.
+      if (!animation) return;
+      // 자동 애니메이션 모드 — 컨테이너(캔버스) 크기 기준으로 궤도 계산
+      const cw = canvasRef.current?.width || 0;
+      const ch = canvasRef.current?.height || 0;
+      mouseRef.current.y =
+        -(ch / 2) +
+        Math.sin(configRef.current.currentTime * 0.7) * (ch * 0.25) +
+        ch;
+      mouseRef.current.x =
+        cw / 2 +
+        Math.sin(configRef.current.currentTime * 0.6) * -(cw * 0.35);
     };
 
     /**
